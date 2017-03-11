@@ -60,3 +60,9 @@ update msg model =
                 { model | rating = updateRating } ! [ Cmd.map RatingMessage subCmd ]
 
 ```
+
+## Examples
+
+See the [examples][examples] folder
+
+[examples]: https://github.com/Bernardoow/Elm-Rating-Component/tree/master/examples
