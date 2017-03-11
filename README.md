@@ -63,6 +63,7 @@ update msg model =
 
 ## Examples
 
-See the [examples][examples] folder
+See the [examples][examples] folder or try it on ellie-app: [example1] example.
 
 [examples]: https://github.com/Bernardoow/Elm-Rating-Component/tree/master/examples
+[example1]: https://ellie-app.com/CfKBF6K3DFa1/0
