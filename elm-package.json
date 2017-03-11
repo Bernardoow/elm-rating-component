@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "Simple rating component.",
-    "repository": "https://github.com/Bernardoow/Elm-Rating-Component.git",
+    "repository": "https://github.com/Bernardoow/elm-rating-component.git",
     "license": "BSD3",
     "source-directories": [
         "src"
