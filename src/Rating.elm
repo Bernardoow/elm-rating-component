@@ -23,9 +23,11 @@ import Svg.Events exposing (onMouseOver, onMouseOut)
 type alias Model =
     { rating : Maybe Int
     , quantity : Int
-    , colorDefault : String
-    , colorSelected : String
-    , colorOver : String
+    , svgDefault : Svg.Svg Msg
+    , svgSelected : Svg.Svg Msg
+    , svgOver : Svg.Svg Msg
+    , svgParentAtributes : List ( String, String )
+    , svgParentClass : List ( String, Bool )
     , ratingPercent : Float
     , isOver : Bool
     , ratingOver : Maybe Int
@@ -43,9 +45,11 @@ defaultModel : Model
 defaultModel =
     { rating = Nothing
     , quantity = 5
-    , colorDefault = "#000000"
-    , colorSelected = "#e6e600"
-    , colorOver = "#cc6600"
+    , svgDefault = starDefault
+    , svgSelected = starSelected
+    , svgOver = starOver
+    , svgParentAtributes = [ ( "display", "inline" ) ]
+    , svgParentClass = []
     , ratingPercent = 0
     , isOver = False
     , ratingOver = Nothing
@@ -113,51 +117,73 @@ subscriptions model =
 -- VIEW
 
 
-{-| Get Color generic basead on params.
--}
-getColor : Maybe Int -> Int -> String -> String -> String
-getColor rating position color_selected color_default =
-    case rating of
-        Nothing ->
-            color_default
-
-        Just rating ->
-            if position <= rating then
-                color_selected
-            else
-                color_default
-
-
 {-| Check if is over and pass corret params to do func to do work.
 -}
-is_selected : Model -> Int -> String
+is_selected : Model -> Int -> Svg.Svg Msg
 is_selected model position =
     if model.isOver then
-        getColor model.ratingOver position model.colorOver model.colorDefault
+        model.svgOver
     else
-        getColor model.rating position model.colorSelected model.colorDefault
+        case model.rating of
+            Nothing ->
+                model.svgDefault
+
+            Just rating ->
+                if position <= rating then
+                    model.svgSelected
+                else
+                    model.svgDefault
 
 
 {-| Simple helper function to return list with svgs
 -}
 viewRating : Model -> List (Html Msg)
 viewRating model =
-    List.map (\item -> svg_ item <| is_selected model item) <| List.range 1 model.quantity
+    List.map (\item -> svg_parent model item) <| List.range 1 model.quantity
 
 
-{-| SVG Item. Future its be settable.
--}
-svg_ : Int -> String -> Html Msg
-svg_ position color =
-    Svg.svg [ onMouseOut MouseOut, onMouseOver <| MouseOver position, onClick <| Click position, attribute "height" "100", attribute "width" "100", attribute "xmlns" "http://www.w3.org/2000/svg", attribute "xmlns:svg" "http://www.w3.org/2000/svg" ]
-        [ g []
-            [ node "title"
-                []
-                [ text "star" ]
-            , Svg.path [ d "m0,38l37,0l11,-38l11,38l37,0l-30,23l11,38l-30,-23l-30,23l11,-38l-30,-23l0,0z", fill color, id "svg_2", attribute "stroke-dasharray" "null", attribute "stroke-linecap" "null", attribute "stroke-linejoin" "null", attribute "stroke-width" "0" ]
-                []
-            , text "  "
-            ]
+svg_parent : Model -> Int -> Html Msg
+svg_parent model position =
+    let
+        ( selected, over ) =
+            case model.rating of
+                Nothing ->
+                    ( False, False )
+
+                Just rating ->
+                    if position <= rating then
+                        ( True, model.isOver )
+                    else
+                        ( False, model.isOver )
+    in
+        div [ Html.Attributes.attribute "data-selected" <| toString selected, Html.Attributes.attribute "data-over" <| toString over, Html.Attributes.style model.svgParentAtributes, Html.Attributes.classList model.svgParentClass, onMouseOut MouseOut, onMouseOver <| MouseOver position, onClick <| Click position ]
+            [ is_selected model position ]
+
+
+starDefault =
+    svg [ class "star rating", attribute "data-rating" "5", attribute "height" "25", attribute "width" "23" ]
+        [ node "polygon"
+            [ attribute "points" "9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78", attribute "style" "fill-rule:nonzero;" ]
+            []
+        , text "  "
+        ]
+
+
+starSelected =
+    svg [ class "star rating", attribute "data-rating" "5", attribute "height" "25", fill "#e6e600", attribute "width" "23" ]
+        [ node "polygon"
+            [ attribute "points" "9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78", attribute "style" "fill-rule:nonzero;" ]
+            []
+        , text "  "
+        ]
+
+
+starOver =
+    svg [ class "star rating", attribute "data-rating" "5", attribute "height" "25", fill "#cc6600", attribute "width" "23" ]
+        [ node "polygon"
+            [ attribute "points" "9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78", attribute "style" "fill-rule:nonzero;" ]
+            []
+        , text "  "
         ]
 
 

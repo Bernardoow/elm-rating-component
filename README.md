@@ -16,11 +16,30 @@ The Rating need a Rating Model on your model  like this:
 
 The view will be update based on this rating. Rating expose `defaultModel`.
 
-I recomend only change the variable:  quantity, colorDefault ,colorSelected, colorOver, readOnly.
+I recomend just change the variables:  quantity, svgDefault, svgSelected, svgOver, svgParentAtributes, svgParentClass, readOnly.
 
-If need show rating defined, change rating and rating Percent.
+For you use set svgDefault, svgSelected and svgSelected for the three types of status of svgs.
+Another choice is use svgParentClass or svgParentAtributes with the data-atribute at div parent of svgs. For all the svgs selected is added "data-selected" = True  and "data-over" = True at div.
 
-Dont Touch isOver, ratingOver.
+If you need to show rating defined, change rating and rating Percent.
+
+Dont modify isOver, ratingOver.
+
+```elm
+type alias Model =
+    { rating : Maybe Int
+    , quantity : Int
+    , svgDefault : Svg.Svg Msg
+    , svgSelected : Svg.Svg Msg
+    , svgOver : Svg.Svg Msg
+    , svgParentAtributes : List ( String, String )
+    , svgParentClass : List ( String, Bool )
+    , ratingPercent : Float
+    , isOver : Bool
+    , ratingOver : Maybe Int
+    , readOnly : Bool
+    }
+```
 
 ```elm
 initial : Model
@@ -67,3 +86,10 @@ See the [examples][examples] folder or try it on ellie-app: [example1] example.
 
 [examples]: https://github.com/Bernardoow/Elm-Rating-Component/tree/master/examples
 [example1]: https://ellie-app.com/CfKBF6K3DFa1/0
+
+
+##
+SVG Start Found at [star_source]
+
+
+[star_source]: https://codepen.io/brianknapp/pen/JEotD/

@@ -7,7 +7,7 @@
         "name": "Model",
         "comment": " The type of The Rating.\n",
         "args": [],
-        "type": "{ rating : Maybe.Maybe Int , quantity : Int , colorDefault : String , colorSelected : String , colorOver : String , ratingPercent : Float , isOver : Bool , ratingOver : Maybe.Maybe Int , readOnly : Bool }"
+        "type": "{ rating : Maybe.Maybe Int , quantity : Int , svgDefault : Svg.Svg Rating.Msg , svgSelected : Svg.Svg Rating.Msg , svgOver : Svg.Svg Rating.Msg , svgParentAtributes : List ( String, String ) , svgParentClass : List ( String, Bool ) , ratingPercent : Float , isOver : Bool , ratingOver : Maybe.Maybe Int , readOnly : Bool }"
       }
     ],
     "types": [
