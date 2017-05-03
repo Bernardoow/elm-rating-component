@@ -122,7 +122,15 @@ subscriptions model =
 is_selected : Model -> Int -> Svg.Svg Msg
 is_selected model position =
     if model.isOver then
-        model.svgOver
+        case model.ratingOver of
+            Nothing ->
+                model.svgDefault
+
+            Just over_position ->
+                if position <= over_position then
+                    model.svgOver
+                else
+                    model.svgDefault
     else
         case model.rating of
             Nothing ->
