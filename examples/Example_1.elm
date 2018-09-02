@@ -1,12 +1,13 @@
-module Basic exposing (..)
+module Basic exposing (Model, Msg(..), initial, main, subscriptions, update, view)
 
-import Rating exposing (Msg(..))
 import Html exposing (..)
-import Html.Events exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Rating exposing (Msg(..))
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (onMouseOver, onMouseOut)
+import Svg.Events exposing (onMouseOut, onMouseOver)
+import Browser exposing (element)
 
 
 type Msg
@@ -27,16 +28,16 @@ view model =
                 Nothing ->
                     Html.text ""
 
-                Just rating ->
+                Just rating_value ->
                     div []
-                        [ p [] [ Html.text <| "Your rating is " ++ (toString rating) ]
-                        , p [] [ Html.text <| "Your rating percent is " ++ (toString model.rating.ratingPercent) ++ " %" ]
+                        [ p [] [ Html.text <| "Your rating is " ++ String.fromInt rating_value ]
+                        , p [] [ Html.text <| "Your rating percent is " ++ String.fromFloat model.rating.ratingPercent ++ " %" ]
                         ]
     in
         div []
             [ Html.map RatingMessage (Rating.view model.rating)
             , rating
-            , input [ onInput QuantityStarInput, value <| toString model.rating.quantity ] []
+            , input [ onInput QuantityStarInput, value <| String.fromInt model.rating.quantity ] []
             , br [] []
             , input [ Html.Attributes.type_ "checkbox", onCheck CheckBoxInput ] []
             , Html.text "read only"
@@ -47,17 +48,19 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RatingMessage msg ->
+        RatingMessage rating_msg ->
             let
                 ( updateRating, subCmd ) =
-                    Rating.update msg model.rating
+                    Rating.update rating_msg model.rating
             in
-                { model | rating = updateRating } ! [ Cmd.map RatingMessage subCmd ]
+                ( { model | rating = updateRating }
+                , Cmd.map RatingMessage subCmd
+                )
 
         QuantityStarInput quantity_str ->
             let
                 quantity =
-                    String.toInt quantity_str |> Result.toMaybe |> Maybe.withDefault 0
+                    String.toInt quantity_str |> Maybe.withDefault 0
 
                 rating =
                     model.rating
@@ -65,7 +68,9 @@ update msg model =
                 rating_update =
                     { rating | quantity = quantity }
             in
-                { model | rating = rating_update } ! []
+                ( { model | rating = rating_update }
+                , Cmd.none
+                )
 
         CheckBoxInput bool ->
             let
@@ -75,7 +80,14 @@ update msg model =
                 rating_update =
                     { rating | readOnly = bool }
             in
-                { model | rating = rating_update } ! []
+                ( { model | rating = rating_update }
+                , Cmd.none
+                )
+
+
+initial : () -> ( Model, Cmd Msg )
+initial _ =
+    ( Model Rating.defaultModel, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -83,15 +95,10 @@ subscriptions model =
     Sub.none
 
 
-initial : Model
-initial =
-    Model Rating.defaultModel
-
-
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    program
-        { init = ( initial, Cmd.none )
+    element
+        { init = initial
         , view = view
         , update = update
         , subscriptions = subscriptions

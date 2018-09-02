@@ -1,8 +1,10 @@
-module Rating exposing (defaultModel, Msg(..), Model, view, update)
+module Rating exposing (defaultModel, Msg(..), update, view, Model)
 
 {-| A Rating for Elm
 
+
 # The exposes
+
 @docs defaultModel, Msg, update, view, Model
 
 -}
@@ -12,7 +14,7 @@ import Html.Attributes exposing (attribute, href, value)
 import Html.Events exposing (onClick, onInput)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (onMouseOver, onMouseOut)
+import Svg.Events exposing (onMouseOut, onMouseOver)
 
 
 -- MODEL
@@ -84,24 +86,36 @@ update msg model =
                                 position
 
                 percent =
-                    (toFloat new_position) / (toFloat model.quantity) * 100
+                    toFloat new_position / toFloat model.quantity * 100
             in
                 if model.readOnly then
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
                 else
-                    { model | rating = Just new_position, ratingPercent = percent } ! []
+                    ( { model | rating = Just new_position, ratingPercent = percent }
+                    , Cmd.none
+                    )
 
         MouseOver position ->
             if model.readOnly then
-                model ! []
+                ( model
+                , Cmd.none
+                )
             else
-                { model | isOver = True, ratingOver = Just position } ! []
+                ( { model | isOver = True, ratingOver = Just position }
+                , Cmd.none
+                )
 
         MouseOut ->
             if model.readOnly then
-                model ! []
+                ( model
+                , Cmd.none
+                )
             else
-                { model | isOver = False } ! []
+                ( { model | isOver = False }
+                , Cmd.none
+                )
 
 
 
@@ -153,19 +167,38 @@ viewRating model =
 svg_parent : Model -> Int -> Html Msg
 svg_parent model position =
     let
+        fromBool : Bool -> String
+        fromBool bool =
+            if bool then
+                "True"
+            else
+                "False"
+
         ( selected, over ) =
             case model.rating of
                 Nothing ->
-                    ( False, False )
+                    ( "False", "False" )
 
                 Just rating ->
                     if position <= rating then
-                        ( True, model.isOver )
+                        ( "True", fromBool model.isOver )
                     else
-                        ( False, model.isOver )
+                        ( "False", fromBool model.isOver )
+
+        styles =
+            List.map (\( key, value ) -> Html.Attributes.style key value) model.svgParentAtributes
+
+        atributos =
+            List.append styles
+                [ Html.Attributes.attribute "data-selected" selected
+                , Html.Attributes.attribute "data-over" over
+                , Html.Attributes.classList model.svgParentClass
+                , onMouseOut MouseOut
+                , onMouseOver <| MouseOver position
+                , onClick <| Click position
+                ]
     in
-        div [ Html.Attributes.attribute "data-selected" <| toString selected, Html.Attributes.attribute "data-over" <| toString over, Html.Attributes.style model.svgParentAtributes, Html.Attributes.classList model.svgParentClass, onMouseOut MouseOut, onMouseOver <| MouseOver position, onClick <| Click position ]
-            [ is_selected model position ]
+        div atributos [ is_selected model position ]
 
 
 starDefault =
